@@ -1,31 +1,36 @@
-import { createSlice } from "@reduxjs/toolkit";
+// reducers/productReducer.js
+const initialState = {
+  data: [],
+  loading: false,
+  error: null,
+};
 
-const initialState = [];
+const productReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "FETCH_PRODUCTS_REQUEST":
+    case "CREATE_PRODUCT_REQUEST":
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
+    case "FETCH_PRODUCTS_SUCCESS":
+      return {
+        ...state,
+        loading: false,
+        data: action.payload,
+        error: null,
+      };
+    case "FETCH_PRODUCTS_FAILURE":
+    case "CREATE_PRODUCT_FAILURE":
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+    default:
+      return state;
+  }
+};
 
-const categoriesSlice = createSlice({
-  name: "categories",
-  initialState,
-  reducers: {
-    addCategory: (state, action) => {
-      state.push(action.payload);
-    },
-    setCategories: (state, action) => {
-      return action.payload;
-    },
-    updateCategory: (state, action) => {
-      const { id, data } = action.payload;
-      const index = state.findIndex((category) => category.id === id);
-      if (index !== -1) {
-        state[index] = { ...state[index], ...data };
-      }
-    },
-    deleteCategory: (state, action) => {
-      return state.filter((category) => category.id !== action.payload);
-    },
-  },
-});
-
-export const { addCategory, setCategories, updateCategory, deleteCategory } =
-  categoriesSlice.actions;
-
-export default categoriesSlice.reducer;
+export default productReducer;

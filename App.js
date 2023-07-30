@@ -431,13 +431,9 @@ export default function App() {
   return (
     <>
       <StatusBar style="auto" />
-      <AuthContextProvider>
-        <UsersContextProvider>
-          <Provider store={store}>
-            <Root />
-          </Provider>
-        </UsersContextProvider>
-      </AuthContextProvider>
+      <Provider store={store}>
+        <Root />
+      </Provider>
     </>
   );
 }

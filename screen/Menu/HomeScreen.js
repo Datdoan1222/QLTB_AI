@@ -2,38 +2,33 @@ import { useContext, useEffect, useState } from "react";
 import { StyleSheet, View, FlatList, SafeAreaView } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
-import { fetchCategories } from "../../util/Categories";
-import { setCategories } from "../../store/redux/Categories";
-
 import CategoryGirdItem from "../../components/Menu/CategoryGirdItem";
-
 import Search from "../../components/Ui/Display/Seacrch";
 import ErrorOverLay from "../../components/Ui/Handle/ErrorOverLay";
 import LoadingOverlay from "../../components/Ui/Handle/LoadingOverLay";
+import { fetchPosts, fetchProducts } from "../../store/redux/categoriesAction";
+import { API, CATEGORIES } from "../../util/Url_API";
 
 function HomeScreen({ navigation }) {
   const [isFetching, setIsFetching] = useState(true);
-  const [error, setError] = useState();
-  const categories = useSelector((state) => state.categoiries);
+  // const [error, setError] = useState();
   const dispatch = useDispatch();
+  const { data, loading, error } = useSelector((state) => state.categories);
+  console.log(error, "categories");
   useEffect(() => {
-    async function getCategories() {
+    function getCategories() {
       setIsFetching(true);
-      try {
-        const categories = await fetchCategories();
-        dispatch(setCategories(categories));
-      } catch (error) {
-        setError("Could not fetch category!");
-      }
+      dispatch(fetchProducts());
       setIsFetching(false);
     }
     getCategories();
   }, [dispatch]);
 
-  if (error && !isFetching) {
+  if (error) {
     return <ErrorOverLay message={error} />;
   }
-  if (isFetching) {
+
+  if (loading) {
     return <LoadingOverlay />;
   }
   function renderCategoryItem(itemData) {
@@ -59,7 +54,7 @@ function HomeScreen({ navigation }) {
       <Search />
       <View style={styles.flatList}>
         <FlatList
-          data={categories}
+          data={data}
           keyExtractor={(item) => item.id}
           renderItem={renderCategoryItem}
           numColumns={2}

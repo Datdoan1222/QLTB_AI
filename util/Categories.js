@@ -12,18 +12,7 @@ export async function storeCategory(categoryData) {
 }
 export async function fetchCategories() {
   const response = await axios.get(BACKEND_URL + "/Category/GetCategories");
-  const categories = [];
-  for (const key in response.data) {
-    const categoryObj = {
-      id: response.data[key].id,
-      parentId: response.data[key].parentId,
-      name: response.data[key].name,
-      image: response.data[key].image,
-      color: response.data[key].color,
-    };
-    categories.push(categoryObj);
-  }
-  return categories;
+  return response.data;
 }
 export function updateCategory(id, categoryData) {
   return axios.put(BACKEND_URL + `/GetCategories/${id}.json`, categoryData);
