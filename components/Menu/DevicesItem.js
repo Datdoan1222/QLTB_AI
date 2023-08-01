@@ -1,29 +1,25 @@
 import { Image, Pressable, Text, View, StyleSheet, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
-import { addFavorite, removeFavorite } from "../../store/redux/Favorites";
+
 import DevicesDetails from "./DevicesDetails";
 import IconsButton from "../Ui/Button/IconsButton";
+import { removeFavoriteDevice } from "../../store/redux/Favorites/favoritesReducer";
+import IconStatus from "../Ui/Display/IconStatus";
 
 function DevicesItem({ data, deleteFavorite, route }) {
-  const favoriteDevicesIds = useSelector((state) => state.favories.ids);
-  const deviceIsFavorite = favoriteDevicesIds.includes(data.id);
-  const dispatch = useDispatch();
-  function deleteDeviceFavorite() {
-    if (deviceIsFavorite) {
-      dispatch(removeFavorite({ id: data.id }));
-    } else {
-      dispatch(addFavorite({ id: data.id }));
-    }
+  function removeDeviceFavorite(deviceId) {
+    removeFavoriteDevice(deviceId);
+    navigation.goBack();
   }
   const navigation = useNavigation();
 
-  function selectDeviceItemHandelr(dataitem) {
+  function selectDeviceItemHandelr(data) {
     navigation.navigate("DevicesDetailsScreen", {
-      dataitem: dataitem,
+      dataitem: data,
     });
   }
-  const showConfirmationAlert = () => {
+  const showConfirmationAlert = (deviceId) => {
     Alert.alert(
       "Xác nhận",
       "Bạn có chắc chắn bạn muốn xóa yêu thích thiết bị nàynày?",
@@ -34,7 +30,7 @@ function DevicesItem({ data, deleteFavorite, route }) {
         },
         {
           text: "Xác nhận",
-          onPress: deleteDeviceFavorite,
+          onPress: removeDeviceFavorite(deviceId),
         },
       ]
     );
@@ -64,14 +60,22 @@ function DevicesItem({ data, deleteFavorite, route }) {
             returnDate={data.returnDate}
             deleteFavorite
           />
-          {deleteFavorite && (
-            <View style={styles.iconTrash}>
+          {deleteFavorite ? (
+            <View style={styles.icon}>
               <IconsButton
                 icon="trash-outline"
                 size={24}
                 color="red"
-                onPress={showConfirmationAlert}
+                onPress={() => showConfirmationAlert(data.id)}
               />
+            </View>
+          ) : (
+            <View style={styles.icon}>
+              <IconStatus
+                name="alert-circle-sharp"
+                size={10}
+                color={data.status}
+              ></IconStatus>
             </View>
           )}
         </View>
@@ -110,7 +114,7 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 15,
   },
-  iconTrash: {
+  icon: {
     right: 55,
     marginTop: 10,
   },

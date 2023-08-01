@@ -1,11 +1,11 @@
-import { useContext, useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import DevicesList from "../../../components/Menu/DevicesList";
 import ErrorOverLay from "../../../components/Ui/Handle/ErrorOverLay";
 import LoadingOverlay from "../../../components/Ui/Handle/LoadingOverLay";
 import IconsButton from "../../../components/Ui/Button/IconsButton";
-import { DeviceContext } from "../../../store/context/Devices-Context";
-import { fetchDevices } from "../../../util/Devices";
+import { fetchDevices } from "../../../store/redux/Devices/devicesAction";
 
 function DeviceOverviewScreen({ route, navigation }) {
   useLayoutEffect(() => {
@@ -22,30 +22,23 @@ function DeviceOverviewScreen({ route, navigation }) {
       ),
     });
   }, []);
-  const [isFetching, setIsFetching] = useState(true);
-  const [error, setError] = useState();
-  const deviceCtx = useContext(DeviceContext);
+  const dispatch = useDispatch();
+  const { data, loading, error } = useSelector((state) => state.devices);
   useEffect(() => {
-    async function getDevices() {
-      setIsFetching(true);
-      try {
-        const devices = await fetchDevices(route.params.idCategories);
-        deviceCtx.setDevice(devices);
-      } catch (error) {
-        setError("Could not fetch device!");
-      }
-      setIsFetching(false);
+    function getDevices() {
+      dispatch(fetchDevices());
     }
     getDevices();
-  }, []);
+  }, [dispatch]);
 
-  if (error && !isFetching) {
+  if (error) {
     return <ErrorOverLay message={error} />;
   }
-  if (isFetching) {
+
+  if (loading) {
     return <LoadingOverlay />;
   }
 
-  return <DevicesList item={deviceCtx.devices} />;
+  return <DevicesList item={data} />;
 }
 export default DeviceOverviewScreen;
