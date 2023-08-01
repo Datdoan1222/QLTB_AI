@@ -11,17 +11,6 @@ function DevicesDetails({
   isColorStatus,
   deleteFavorite,
 }) {
-  function iconsShow() {
-    if (!deleteFavorite) {
-      return (
-        <IconStatus
-          name="alert-circle-sharp"
-          size={10}
-          color={status}
-        ></IconStatus>
-      );
-    }
-  }
   return (
     <View style={[style]}>
       <View style={styles.titleContainer}>
@@ -32,7 +21,6 @@ function DevicesDetails({
         >
           {name}
         </Text>
-        {!isColorStatus && iconsShow()}
       </View>
       <View style={styles.content}>
         <Text

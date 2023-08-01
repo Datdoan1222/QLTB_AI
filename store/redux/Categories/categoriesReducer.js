@@ -1,28 +1,31 @@
-// reducers/productReducer.js
 const initialState = {
   data: [],
   loading: false,
   error: null,
 };
 
-const productReducer = (state = initialState, action) => {
+const categoriesReducer = (state = initialState, action) => {
   switch (action.type) {
-    case "FETCH_PRODUCTS_REQUEST":
-    case "CREATE_PRODUCT_REQUEST":
+    case "FETCH_CATEGORIES_REQUEST":
+    case "CREATE_CTEGORY_REQUEST":
+    case "UPDATE_CTEGORY_REQUEST":
+    case "DELETE_CTEGORY_REQUEST":
       return {
         ...state,
         loading: true,
         error: null,
       };
-    case "FETCH_PRODUCTS_SUCCESS":
+    case "FETCH_CATEGORIES_SUCCESS":
       return {
         ...state,
         loading: false,
         data: action.payload,
         error: null,
       };
-    case "FETCH_PRODUCTS_FAILURE":
-    case "CREATE_PRODUCT_FAILURE":
+    case "FETCH_CATEGORIES_FAILURE":
+    case "CREATE_CTEGORY_FAILURE":
+    case "UPDATE_CTEGORY_FAILURE":
+    case "DELETE_CTEGORY_FAILURE":
       return {
         ...state,
         loading: false,
@@ -33,4 +36,4 @@ const productReducer = (state = initialState, action) => {
   }
 };
 
-export default productReducer;
+export default categoriesReducer;

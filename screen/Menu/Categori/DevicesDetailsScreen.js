@@ -1,21 +1,61 @@
-import { useLayoutEffect, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
+import React, { useLayoutEffect, useEffect } from "react";
+import { Image, Text, View, StyleSheet, ScrollView, Alert } from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 
-import { Image, Text, View, StyleSheet, ScrollView, Alert } from "react-native";
 import DevicesDetails from "../../../components/Menu/DevicesDetails";
 import SubTitle from "../../../components/Menu/SubTitle";
 import IconButton from "../../../components/Ui/Button/IconsButton";
 import { Colors } from "../../../constants/Styles";
 import Button from "../../../components/Ui/Button/Button";
-import { addFavorite, removeFavorite } from "../../../store/redux/Favorites";
-import { useRoute } from "@react-navigation/native";
+import {
+  addFavoriteDevice,
+  removeFavoriteDevice,
+} from "../../../store/redux/Favorites/favoritesReducer";
 import IconsButton from "../../../components/Ui/Button/IconsButton";
+import {
+  deleteDevice,
+  fetchDevices,
+} from "../../../store/redux/Devices/devicesAction";
+import LoadingOverlay from "../../../components/Ui/Handle/LoadingOverLay";
 function DevicesDetailsScreen({ navigation }) {
-  function deleteDevice() {
-    // deleteDevice
-    Alert.alert("hello", "Đã xóa thành công");
-  }
+  const route = useRoute();
+  const { dataitem } = route.params;
+  const dispatch = useDispatch();
+
+  const { data, loading, error, success } = useSelector(
+    (state) => state.devices
+  );
+  const favoriteDevices = useSelector(
+    (state) => state.favories.favoriteDevices
+  );
+  const handleDeleteDevice = (deviceId) => {
+    dispatch(deleteDevice(deviceId));
+  };
+  const showConfirmationAlert = (deviceId) => {
+    Alert.alert("Xác nhận", "Bạn có chắc chắn bạn muốn xóa thiết bị này?", [
+      {
+        text: "Hủy",
+        style: "cancel",
+      },
+      {
+        text: "Xác nhận",
+        onPress: handleDeleteDevice(deviceId),
+      },
+    ]);
+  };
+  useEffect(() => {
+    if (success) {
+      Alert.alert("Thành công", "Đã xóa thiết bị thành công!");
+    }
+  }, [success]);
+  useEffect(() => {
+    function getDevices() {
+      dispatch(fetchDevices());
+    }
+    getDevices();
+  }, [dispatch]);
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -23,23 +63,30 @@ function DevicesDetailsScreen({ navigation }) {
           icon="trash-outline"
           color="red"
           size={30}
-          onPress={deleteDevice}
+          onPress={() => showConfirmationAlert(dataitem.id)}
         />
       ),
     });
-  }, []);
-  const route = useRoute();
-  const { dataitem } = route.params;
-  const favoriteDevicesIds = useSelector((state) => state.favories.ids);
-  const deviceId = dataitem.id;
-  const deviceIsFavorite = favoriteDevicesIds.includes(deviceId);
-  const dispatch = useDispatch();
-  function changeFavoriteStatusHandler() {
-    if (deviceIsFavorite) {
-      dispatch(removeFavorite({ id: deviceId }));
+  }, [dataitem.id, navigation]);
+  // remove Device
+  if (loading) {
+    return <LoadingOverlay />;
+  }
+
+  if (error) {
+    return <ErrorOverLay message={error} />;
+  }
+
+  // remove Favorite Device
+  const isDeviceFavorite = (deviceId) =>
+    favoriteDevices.some((device) => device.id === deviceId);
+
+  function changeFavoriteStatusHandler(deviceId) {
+    if (isDeviceFavorite(deviceId)) {
+      dispatch(removeFavoriteDevice(deviceId));
     } else {
       if (dataitem.status !== 1) {
-        dispatch(addFavorite({ id: deviceId }));
+        dispatch(addFavoriteDevice(dataitem));
       } else {
         Alert.alert(
           "Thiết bị này có chấm đỏ, dấu hiệu đang báo hỏng",
@@ -50,15 +97,12 @@ function DevicesDetailsScreen({ navigation }) {
   }
 
   function addDeviceHander({}) {
-    if (deviceIsFavorite) {
+    if (isDeviceFavorite(dataitem.id)) {
       Alert.alert("Báo!!!!", "Thêm thành công");
     } else {
       Alert.alert("Báo!!!!", "Thêm không thành công");
     }
   }
-  function deleteDeviceHandler() {}
-  function deleteDeviceHandler1() {}
-
   return (
     <ScrollView style={styles.rootContainer}>
       <Image style={styles.image} source={{ uri: dataitem.image }} />
@@ -66,11 +110,10 @@ function DevicesDetailsScreen({ navigation }) {
         <View style={styles.titleRow}>
           <Text style={styles.title}>{dataitem.name}</Text>
           <IconButton
-            icon={deviceIsFavorite ? "heart" : "heart-outline"}
-            color={deviceIsFavorite ? "#FFC0CB" : "#FF1493"}
+            icon={isDeviceFavorite(dataitem.id) ? "heart" : "heart-outline"}
+            color={isDeviceFavorite(dataitem.id) ? "#FFC0CB" : "#FF1493"}
             size={40}
-            key={deviceId}
-            onPress={changeFavoriteStatusHandler}
+            onPress={() => changeFavoriteStatusHandler(dataitem.id)}
           />
         </View>
         <DevicesDetails
@@ -92,7 +135,7 @@ function DevicesDetailsScreen({ navigation }) {
           <Text>{dataitem.description}</Text>
         </ScrollView>
         <View style={styles.button}>
-          <Button onPress={addDeviceHander}>Thêm vào danh sách</Button>
+          <Button onPress={() => addDeviceHander}>Thêm vào danh sách</Button>
         </View>
       </View>
     </ScrollView>

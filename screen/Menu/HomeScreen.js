@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, View, FlatList, SafeAreaView } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -6,20 +6,14 @@ import CategoryGirdItem from "../../components/Menu/CategoryGirdItem";
 import Search from "../../components/Ui/Display/Seacrch";
 import ErrorOverLay from "../../components/Ui/Handle/ErrorOverLay";
 import LoadingOverlay from "../../components/Ui/Handle/LoadingOverLay";
-import { fetchPosts, fetchProducts } from "../../store/redux/categoriesAction";
-import { API, CATEGORIES } from "../../util/Url_API";
+import { fetchCategories } from "../../store/redux/Categories/categoriesAction";
 
 function HomeScreen({ navigation }) {
-  const [isFetching, setIsFetching] = useState(true);
-  // const [error, setError] = useState();
   const dispatch = useDispatch();
   const { data, loading, error } = useSelector((state) => state.categories);
-  console.log(error, "categories");
   useEffect(() => {
     function getCategories() {
-      setIsFetching(true);
-      dispatch(fetchProducts());
-      setIsFetching(false);
+      dispatch(fetchCategories());
     }
     getCategories();
   }, [dispatch]);
